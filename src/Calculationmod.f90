@@ -4,13 +4,13 @@ module CalculationModule
 
 implicit none
 PRIVATE
-PUBLIC Bonds, BondLength, BendAngle, AssignBonds, AddBond
+PUBLIC Bonds, BondLength, BendAngle, AssignBonds, AddBond, AddAngle, TorsionAngle
 
 type Bonds
     CHARACTER(2)    :: Elements
     real*8          :: Length
     integer         :: Atom1, Atom2
-end type    
+end type
 
 contains
 real*8 function BondLength (Molecule, Atom1, Atom2)
@@ -21,8 +21,8 @@ real*8 function BondLength (Molecule, Atom1, Atom2)
     integer, INTENT(IN)                  :: Atom1, Atom2
 
     DeltaX = Molecule(Atom1)%x - Molecule(Atom2)%x
-    DeltaY = Molecule(Atom1)%Y - Molecule(Atom2)%Y
-    DeltaZ = Molecule(Atom1)%Z - Molecule(Atom2)%z
+    DeltaY = Molecule(Atom1)%y - Molecule(Atom2)%y
+    DeltaZ = Molecule(Atom1)%z - Molecule(Atom2)%z
 
     Bondlength = sqrt(DeltaX**2 + DeltaY**2 + DeltaZ**2)
 end function
@@ -96,27 +96,160 @@ subroutine AddBond (Bond, BondsArray)
 end subroutine
 
 
-subroutine BendAngle (molecule, BondsArray)!, Angles)
+subroutine BendAngle (Molecule, BondsArray, AnglesArray)
     type(Atom), INTENT(IN), ALLOCATABLE :: Molecule(:)
     type(Bonds), INTENT(IN)             :: BondsArray(:)
-    real*8, ALLOCATABLE                 :: Angles(:) 
+    real*8, ALLOCATABLE                 :: AnglesArray(:) 
     real*8                              :: Angle
-    integer                             :: i, j, k, l
+    integer                             :: i, j, k
 
-    do i = 1, size(Molecule)
-        if (Molecule(i)%Element == "C") then
-            do j = 1, size(BondsArray)
-                do k = j, size(BondsArray)
-                    if (j /= k .and. BondsArray(i)%Atom1 == i .and. BondsArray(k)%Atom1 == i) then
-                        print *, Molecule(i)%Element, Molecule(j)%Element, Molecule(k)%Element
+    do i = 1,size(Molecule)
+        if (Molecule(i)%element == 'C') then
+           do j = 1,size(BondsArray)
+              do k = j,size(BondsArray)
+                 if (j /= k .and. BondsArray(j)%Atom1 == i .and. BondsArray(k)%Atom1 == i) then   
+                    Angle = -((BondLength(Molecule, BondsArray(j)%Atom2, BondsArray(k)%Atom2))**2 - &
+                            (BondsArray(j)%length)**2 - (BondsArray(k)%length)**2) / (2*(BondsArray(j)%length)*   &
+                            (BondsArray(k)%length))
+                    call AddAngle(Angle, AnglesArray)
+                 endif
+                 if (j /= k .and. BondsArray(j)%Atom2 == i .and. BondsArray(k)%Atom1 == i) then
+                    Angle = -((BondLength(Molecule, BondsArray(j)%Atom2, BondsArray(k)%Atom2))**2 - &
+                            ((BondsArray(j)%length)**2 - (BondsArray(k)%length)**2) / (2*(BondsArray(j)%length)*  &
+                            (BondsArray(k)%length)))
+                    call AddAngle(Angle, AnglesArray)
+                 endif
+              enddo
+           enddo
+        endif
+     enddo
+end subroutine
+
+
+subroutine AddAngle (Angle, AnglesArray)
+!Subroutine AddAngle stores the angle made in the BendAngle subroutine in an array
+!A DummyArray is created to temporarily store the added angle
+    real*8, INTENT(IN)                 :: Angle
+    real*8, INTENT(INOUT), ALLOCATABLE :: AnglesArray(:)
+    real*8, ALLOCATABLE                :: DummyArray(:)
+    integer                                 :: i, j
+            
+    if (allocated(AnglesArray)) then
+        i = size(AnglesArray)
+        allocate(DummyArray(i+1))
+        do j = 1, i
+            DummyArray(j) = AnglesArray(j)
+        enddo
+        DummyArray(i+1) = Angle
+        deallocate(AnglesArray)
+        call move_alloc (DummyArray, AnglesArray)
+    else
+        allocate(AnglesArray(1))
+        AnglesArray(1) = Angle
+    endif
+end subroutine
+   
+
+subroutine TorsionAngle (Molecule, BondsArray, TorsionAnglesArray)
+    type(Atom), INTENT(IN), ALLOCATABLE :: Molecule(:)
+    type(Bonds), INTENT(IN)             :: BondsArray(:)
+    real*8, ALLOCATABLE                 :: TorsionAnglesArray(:)
+    real*8                              :: Phi, x, y
+    real*8, dimension(3)                :: b1, b2, b3, n1, n2, m1
+    integer                             :: i, j, k
+
+    do i = 1,size(BondsArray)
+        if (BondsArray(i)%Elements == 'CC') then
+            do j = 1,size(BondsArray)
+                do k = j,size(BondsArray)
+                    if (j /= k .and. BondsArray(j)%Atom1 == bondsArray(i)%Atom1 &
+                    .and. BondsArray(j)%Atom2 /= bondsArray(i)%Atom2 &
+                    .and. BondsArray(k)%Atom1 == BondsArray(i)%Atom2 & 
+                    .and. BondsArray(k)%Atom2 /= BondsArray(i)%Atom1) then 
+
+                        b1(1) = Molecule(BondsArray(j)%Atom2)%x - Molecule(BondsArray(i)%Atom1)%x
+                        b1(2) = Molecule(BondsArray(j)%Atom2)%y - Molecule(BondsArray(i)%Atom1)%y
+                        b1(3) = Molecule(BondsArray(j)%Atom2)%z - Molecule(BondsArray(i)%Atom1)%z
+
+                        b2(1) = Molecule(BondsArray(i)%Atom1)%x - Molecule(BondsArray(i)%Atom2)%x
+                        b2(2) = Molecule(BondsArray(i)%Atom1)%y - Molecule(BondsArray(i)%Atom2)%y
+                        b2(3) = Molecule(BondsArray(i)%Atom1)%z - Molecule(BondsArray(i)%Atom2)%z
+
+                        b3(1) = Molecule(BondsArray(k)%Atom2)%x - Molecule(BondsArray(i)%Atom2)%x
+                        b3(2) = Molecule(BondsArray(k)%Atom2)%y - Molecule(BondsArray(i)%Atom2)%y
+                        b3(3) = Molecule(BondsArray(k)%Atom2)%z - Molecule(BondsArray(i)%Atom2)%z
                         
-                    endif
-                    if (j /= k .and. BondsArray(i)%Atom2 == i .and. BondsArray(k)%Atom1 == i) then
-                        print *, Molecule(i)%Element, Molecule(j)%Element, Molecule(k)%Element
+                        n1 = CrossProduct(b1, b2)
+                        n2 = CrossProduct(b2, b3)
+                        m1 = CrossProduct(n1, b2)
+                        x = DOT_PRODUCT(n1, n2)
+                        y = DOT_PRODUCT(m1, n2)
+                        Phi = atan2(y,x)
+                        call AddTorsionAngle (Phi, TorsionAnglesArray)
+                         
+                    elseif (j /= k .and. BondsArray(j)%Atom2 == bondsArray(i)%Atom1 &
+                    .and. BondsArray(j)%Atom2 /= bondsArray(i)%Atom2 &
+                    .and. BondsArray(k)%Atom1 == BondsArray(i)%Atom2 & 
+                    .and. BondsArray(k)%Atom2 /= BondsArray(i)%Atom1) then
+
+                        b1(1) = Molecule(BondsArray(j)%Atom2)%x - Molecule(BondsArray(i)%Atom1)%x
+                        b1(2) = Molecule(BondsArray(j)%Atom2)%y - Molecule(BondsArray(i)%Atom1)%y
+                        b1(3) = Molecule(BondsArray(j)%Atom2)%z - Molecule(BondsArray(i)%Atom1)%z
+
+                        b2(1) = Molecule(BondsArray(i)%Atom1)%x - Molecule(BondsArray(i)%Atom2)%x
+                        b2(2) = Molecule(BondsArray(i)%Atom1)%y - Molecule(BondsArray(i)%Atom2)%y
+                        b3(3) = Molecule(BondsArray(i)%Atom1)%z - Molecule(BondsArray(i)%Atom2)%z
+
+                        b3(1) = Molecule(BondsArray(k)%Atom2)%x - Molecule(BondsArray(i)%Atom2)%x
+                        b3(2) = Molecule(BondsArray(k)%Atom2)%y - Molecule(BondsArray(i)%Atom2)%y
+                        b3(3) = Molecule(BondsArray(k)%Atom2)%z - Molecule(BondsArray(i)%Atom2)%z
+
+                        n1 = CrossProduct(b1, b2)
+                        n2 = CrossProduct(b2, b3)
+                        m1 = CrossProduct(n1, b2)
+                        x = DOT_PRODUCT(n1, n2)
+                        y = DOT_PRODUCT(m1, n2)
+                        Phi = atan2(y,x)
+                        call AddTorsionAngle (Phi, TorsionAnglesArray)
+    
                     endif
                 enddo
             enddo
         endif
     enddo
+end subroutine
+
+
+function CrossProduct (x, y)
+!The CrossProduct function calculates the cross product of two vectors  
+    real*8, DIMENSION(3)    :: CrossProduct, x, y
+
+    CrossProduct(1) = (x(2)*y(3)) - (x(3)*y(2))
+    CrossProduct(2) = (x(1)*y(3)) - (x(3)*y(1))
+    CrossProduct(3) = (x(1)*y(2)) - (x(2)*y(1))
+end function
+
+
+subroutine AddTorsionAngle (Phi, TorsionAnglesArray)
+!Subroutine AddTorsionAngle stores the angle made in the TorsionAngle subroutine in an array
+!A DummyArray is created to temporarily store the added torsion angle
+    real*8, INTENT(IN)                 :: Phi
+    real*8, INTENT(INOUT), ALLOCATABLE :: TorsionAnglesArray(:)
+    real*8, ALLOCATABLE                :: DummyArray(:)
+    integer                            :: i, j
+                
+    if (allocated(TorsionAnglesArray)) then
+        i = size(TorsionAnglesArray)
+        allocate(DummyArray(i+1))
+        do j = 1, i
+            DummyArray(j) = TorsionAnglesArray(j)
+        enddo
+        DummyArray(i+1) = Phi
+        deallocate(TorsionAnglesArray)
+        call move_alloc (DummyArray, TorsionAnglesArray)
+    else
+        allocate(TorsionAnglesArray(1))
+        TorsionAnglesArray(1) = Phi
+    endif
 end subroutine
 end module CalculationModule

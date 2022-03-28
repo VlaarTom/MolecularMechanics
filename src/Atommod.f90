@@ -9,7 +9,8 @@ type Atom
 end type
 
 type Parameter
-    real*8 :: ForceConstantCC, ForceConstantCH, CCBond, CHBond
+    real*8 :: ForceConstantCC, ForceConstantCH, CCBond, CHBond, ForceConstantAngle, EquiAngle, &
+    V1, n, gamma, CCharge, HCharge, CoulombConstant, Avogadro, CWellDepth, HWellDepth, CSigma, HSigma
 end type
 
 contains
@@ -32,10 +33,24 @@ end subroutine
 subroutine ParamaterInput (Variable)
     type(Parameter), INTENT(INOUT) :: Variable
 
-    Variable%ForceConstantCC    = 317   !kcal/(mol Angstrom**2)
-    Variable%ForceConstantCH    = 300   !?????
-    Variable%CCBond             = 1.507 !Angstrom
-    Variable%CHBond             = 1.094 !Angstrom
+    Variable%ForceConstantCC    = 317                       !kcal/(mol Angstrom**2)
+    Variable%ForceConstantCH    = 300                       !?????
+    Variable%CCBond             = 1.507                     !Angstrom
+    Variable%CHBond             = 1.094                     !Angstrom
+    Variable%ForceConstantAngle = 150                       !Unknown
+    Variable%EquiAngle          = 2                         !Unknown
+    Variable%V1                 = 50                        !Size of the barrier for rotation
+    Variable%n                  = 1                         !Potential shift 
+    Variable%gamma              = 0                         !Unknown
+    Variable%CCharge            = 1.602176634/(10.0**19)    !Unknown
+    Variable%HCharge            = 1.602176634/(10.0**19)    !Unknown
+    Variable%CoulombConstant    = 8.9875517923*(10**9)      !kg*m**3*S**-2*C**-2
+    Variable%Avogadro           = 6.02214076*(10.0**23)     !mol**-1
+    Variable%CWellDepth         = 0.066                     !kcal/mol
+    Variable%HWellDepth         = 0.030                     !kcal/mol
+    Variable%CSigma             = 1                         !Unknown
+    Variable%HSigma             = 1                         !Unknown
+
 end subroutine
 
 end module AtomModule
