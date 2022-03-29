@@ -1,7 +1,5 @@
 module CalculationModule
-
     use AtomModule
-
 implicit none
 PRIVATE
 PUBLIC Bonds, BondLength, BendAngle, AssignBonds, AddBond, AddAngle, TorsionAngle
@@ -14,8 +12,7 @@ end type
 
 contains
 real*8 function BondLength (Molecule, Atom1, Atom2)
-!Bondlength Function calculates the distance between two atoms 
-
+!Bondlength Function calculates the distance between two atoms using their cartesian coordinates 
     type(Atom), INTENT(IN), ALLOCATABLE  :: Molecule(:)
     real*8                               :: DeltaX, DeltaY, DeltaZ
     integer, INTENT(IN)                  :: Atom1, Atom2
@@ -27,11 +24,9 @@ real*8 function BondLength (Molecule, Atom1, Atom2)
     Bondlength = sqrt(DeltaX**2 + DeltaY**2 + DeltaZ**2)
 end function
 
-
 subroutine AssignBonds (Molecule, BondsArray, Bond, Variable)
-    !AssignBonds subroutine determines which atoms are bonded and adds the bonds to the BondsArray.
-    !The CheckBonds array stores which bonds have been made so that no duplicates occur.
-            
+!AssignBonds subroutine determines which atoms are bonded with a certain threshold and adds the bonds 
+!to the BondsArray. The CheckBonds array stores which bonds have been made so that no duplicates occur.        
     type(Atom), INTENT(IN), ALLOCATABLE      :: Molecule(:)
     type(Parameter), INTENT(IN)              :: Variable
     type(Bonds), INTENT(INOUT), ALLOCATABLE  :: BondsArray(:)
@@ -71,9 +66,8 @@ subroutine AssignBonds (Molecule, BondsArray, Bond, Variable)
     enddo
 end subroutine
         
-
 subroutine AddBond (Bond, BondsArray)
-!Subroutine AddBond stores the bonds made in the AssignBonds subroutine in an array
+!Subroutine AddBond stores the bonds made in the AssignBonds subroutine in an array.
 !A DummyArray is created to temporarily store the added bond
     type(Bonds), INTENT(IN)                 :: Bond
     type(Bonds), INTENT(INOUT), ALLOCATABLE :: BondsArray(:)
@@ -95,8 +89,9 @@ subroutine AddBond (Bond, BondsArray)
     endif
 end subroutine
 
-
 subroutine BendAngle (Molecule, BondsArray, AnglesArray)
+!Subroutine BendAngle calculates the angle between three atoms. The first if statement makes sure the angle is being calculated 
+!with a carbon atom as centre atom. The other statements make sure that the other two atoms are connected to the same centre atom.
     type(Atom), INTENT(IN), ALLOCATABLE :: Molecule(:)
     type(Bonds), INTENT(IN)             :: BondsArray(:)
     real*8, ALLOCATABLE                 :: AnglesArray(:) 
@@ -125,7 +120,6 @@ subroutine BendAngle (Molecule, BondsArray, AnglesArray)
      enddo
 end subroutine
 
-
 subroutine AddAngle (Angle, AnglesArray)
 !Subroutine AddAngle stores the angle made in the BendAngle subroutine in an array
 !A DummyArray is created to temporarily store the added angle
@@ -149,8 +143,11 @@ subroutine AddAngle (Angle, AnglesArray)
     endif
 end subroutine
    
-
 subroutine TorsionAngle (Molecule, BondsArray, TorsionAnglesArray)
+!Subroutine TorsionAngle calculates the torsionangle over four atoms, with two carbon atoms 
+!as the centre atoms. First, via the if statements is determined which connections can be made and makes sure no duplicate 
+!angles are calculated. Of these connections, vectors are made which are used to calculate the torsion angle which are stored 
+!in an array.
     type(Atom), INTENT(IN), ALLOCATABLE :: Molecule(:)
     type(Bonds), INTENT(IN)             :: BondsArray(:)
     real*8, ALLOCATABLE                 :: TorsionAnglesArray(:)
@@ -219,7 +216,6 @@ subroutine TorsionAngle (Molecule, BondsArray, TorsionAnglesArray)
     enddo
 end subroutine
 
-
 function CrossProduct (x, y)
 !The CrossProduct function calculates the cross product of two vectors  
     real*8, DIMENSION(3)    :: CrossProduct, x, y
@@ -228,7 +224,6 @@ function CrossProduct (x, y)
     CrossProduct(2) = (x(1)*y(3)) - (x(3)*y(1))
     CrossProduct(3) = (x(1)*y(2)) - (x(2)*y(1))
 end function
-
 
 subroutine AddTorsionAngle (Phi, TorsionAnglesArray)
 !Subroutine AddTorsionAngle stores the angle made in the TorsionAngle subroutine in an array

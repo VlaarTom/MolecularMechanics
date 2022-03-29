@@ -1,17 +1,13 @@
 module EnergyModule
-
     use AtomModule
     use CalculationModule
-
 implicit none
 PRIVATE
 PUBLIC StretchEnergy, BendingEnergy, TorsionEnergy, NonBondedEnergy, TotalEnergy
 
-    
 contains
 real*8 function StretchEnergy (BondsArray, Variable)
 !The stretch energy function is a function of all pairs of atoms in the molecule.
-
     type(Bonds), INTENT(IN), allocatable    :: BondsArray(:)
     type(Parameter), INTENT(IN)             :: Variable
     integer                                 :: i
@@ -53,6 +49,10 @@ real*8 function TorsionEnergy (TorsionAnglesArray, Variable)
 end function
 
 real*8 function NonBondedEnergy (Molecule, Variable)
+!The NonBondedEnergy function calculates the non bonded energy of the atoms which can be divided into the Van-der Waals 
+!interactions and the electrostatic interactions. The if statements determine the use of the correct variables with the 
+!corresponding atom interactions. The j > i statements make sure that the Van der Waals interactions are counted double 
+!and the electrostatic interactions once. 
     type(atom), INTENT(IN), ALLOCATABLE :: Molecule(:)
     type(Parameter), INTENT(IN)         :: Variable
     integer                             :: i, j
@@ -96,6 +96,7 @@ real*8 function NonBondedEnergy (Molecule, Variable)
 end function
 
 real*8 function TotalEnergy (Molecule, Variable, BondsArray, AnglesArray, TorsionAnglesArray)
+!The TotalEnergy function calculates the total energy of the molecule by the sum of its contributions.
     type(Atom), INTENT(IN), ALLOCATABLE     :: Molecule(:)
     type(Parameter), INTENT(IN)             :: Variable
     type(Bonds), INTENT(IN), ALLOCATABLE    :: BondsArray(:)
