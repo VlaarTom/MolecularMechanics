@@ -37,13 +37,13 @@ Energy = TotalEnergy (Molecule, Variable, BondsArray, AnglesArray, TorsionAngles
 do i = 1, size(Molecule)
     !print *, Molecule(i)%x, Molecule(i)%y, Molecule(i)%z
 enddo
-print *, "The initial energy of the molecule:", Energy
+print *, "The initial energy of the molecule:", Energy, "J/mol"
 print *, "---------------------------------------------------------------------------------"
 
 Call Minimization(Energy, Molecule, Variable, BondsArray, AnglesArray, TorsionAnglesArray, &
 TotalSamples, AcceptedSamples)
 
-print *, "The minimized energy of the molecule:", Energy
+print *, "The minimized energy of the molecule:", Energy,"J/mol"
 !print *, "The minimized coordinates of the molecule:"
 do i = 1, size(Molecule)
     !print *, Molecule(i)%x, Molecule(i)%y, Molecule(i)%z

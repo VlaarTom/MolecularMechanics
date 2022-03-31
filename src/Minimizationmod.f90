@@ -22,36 +22,33 @@ subroutine Minimization(Energy, Molecule, Variable, BondsArray, AnglesArray, Tor
     real*8                                  :: q
     real*8                                  :: DeltaEnergy, NewEnergy, Probability
     integer, INTENT(OUT)                    :: TotalSamples, AcceptedSamples 
-    integer                                 :: RejectionRate
 
     TotalSamples = 0
     AcceptedSamples = 0
-    RejectionRate = 0
 
     allocate(MoleculeNew(size(Molecule)))
     MoleculeNew = Molecule
-    do
+    do 
         Call NewCoordinates(MoleculeNew, Variable)
         NewEnergy = TotalEnergy(MoleculeNew, Variable, BondsArray, AnglesArray, TorsionAnglesArray)
         DeltaEnergy = NewEnergy - Energy
         if (DeltaEnergy < 0) then
             Molecule = MoleculeNew
             Energy = NewEnergy 
-            AcceptedSamples = AcceptedSamples + 1       
+            AcceptedSamples = AcceptedSamples + 1     
         else
             Probability = exp((-DeltaEnergy)/(Variable%Boltzmann*Variable%Temp))
             call random_number(q)
             if (q < Probability) then
                 Molecule = MoleculeNew
                 Energy = NewEnergy
-                AcceptedSamples = AcceptedSamples + 1             
+                AcceptedSamples = AcceptedSamples + 1
+            else
+                MoleculeNew = Molecule             
             endif
         endif
         TotalSamples = TotalSamples + 1
-        if (AcceptedSamples > 1) then
-            RejectionRate = (AcceptedSamples+TotalSamples)/AcceptedSamples
-            if (RejectionRate >1000) EXIT
-        endif
+        if (AcceptedSamples == 1000000) EXIT
     enddo
 end subroutine
 
