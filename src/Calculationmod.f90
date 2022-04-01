@@ -68,7 +68,7 @@ end subroutine
         
 subroutine AddBond (Bond, BondsArray)
 !Subroutine AddBond stores the bonds made in the AssignBonds subroutine in an array.
-!A DummyArray is created to temporarily store the added bond
+!A DummyArray is created to temporarily store the added bond.
     type(Bonds), INTENT(IN)                 :: Bond
     type(Bonds), INTENT(INOUT), ALLOCATABLE :: BondsArray(:)
     type(bonds), ALLOCATABLE                :: DummyArray(:)
@@ -121,8 +121,8 @@ subroutine BendAngle (Molecule, BondsArray, AnglesArray)
 end subroutine
 
 subroutine AddAngle (Angle, AnglesArray)
-!Subroutine AddAngle stores the angle made in the BendAngle subroutine in an array
-!A DummyArray is created to temporarily store the added angle
+!Subroutine AddAngle stores the angle made in the BendAngle subroutine in an array.
+!A DummyArray is created to temporarily store the added angle.
     real*8, INTENT(IN)                 :: Angle
     real*8, INTENT(INOUT), ALLOCATABLE :: AnglesArray(:)
     real*8, ALLOCATABLE                :: DummyArray(:)
@@ -226,8 +226,8 @@ function CrossProduct (x, y)
 end function
 
 subroutine AddTorsionAngle (Phi, TorsionAnglesArray)
-!Subroutine AddTorsionAngle stores the angle made in the TorsionAngle subroutine in an array
-!A DummyArray is created to temporarily store the added torsion angle
+!Subroutine AddTorsionAngle stores the angle made in the TorsionAngle subroutine in an array.
+!A DummyArray is created to temporarily store the added torsion angle.
     real*8, INTENT(IN)                 :: Phi
     real*8, INTENT(INOUT), ALLOCATABLE :: TorsionAnglesArray(:)
     real*8, ALLOCATABLE                :: DummyArray(:)

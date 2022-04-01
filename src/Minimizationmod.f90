@@ -9,7 +9,7 @@ public Minimization, NewCoordinates
 contains
 subroutine Minimization(Energy, Molecule, Variable, BondsArray, AnglesArray, TorsionAnglesArray, &
     TotalSamples, AcceptedSamples)
-!Subroutine Minimization determines wheter the new energy value is lower than the previous value.
+!Subroutine Minimization determines whether the new energy value is lower than the previous value.
 !If the value is lower, the new energy value and coordinates are accepted, if the value is higher than
 !the previous value, the value is rejected and new coordinates are calculated. The algorithm is terminated
 !by calculating a rejection rate.
@@ -17,8 +17,8 @@ subroutine Minimization(Energy, Molecule, Variable, BondsArray, AnglesArray, Tor
     type(Atom), INTENT(INOUT), ALLOCATABLE  :: Molecule(:)
     type(Atom), ALLOCATABLE                 :: MoleculeNew(:)
     type(Parameter), INTENT(IN)             :: Variable
-    type(Bonds), INTENT(IN), ALLOCATABLE    :: BondsArray(:)
-    real*8, INTENT(IN), ALLOCATABLE         :: AnglesArray(:), TorsionAnglesArray(:)
+    type(Bonds), INTENT(INOUT), ALLOCATABLE :: BondsArray(:)
+    real*8, INTENT(INOUT), ALLOCATABLE      :: AnglesArray(:), TorsionAnglesArray(:)
     real*8                                  :: q
     real*8                                  :: DeltaEnergy, NewEnergy, Probability
     integer, INTENT(OUT)                    :: TotalSamples, AcceptedSamples 
@@ -29,7 +29,7 @@ subroutine Minimization(Energy, Molecule, Variable, BondsArray, AnglesArray, Tor
     allocate(MoleculeNew(size(Molecule)))
     MoleculeNew = Molecule
     do 
-        Call NewCoordinates(MoleculeNew, Variable)
+        call NewCoordinates(MoleculeNew, Variable)
         NewEnergy = TotalEnergy(MoleculeNew, Variable, BondsArray, AnglesArray, TorsionAnglesArray)
         DeltaEnergy = NewEnergy - Energy
         if (DeltaEnergy < 0) then
@@ -48,7 +48,8 @@ subroutine Minimization(Energy, Molecule, Variable, BondsArray, AnglesArray, Tor
             endif
         endif
         TotalSamples = TotalSamples + 1
-        if (AcceptedSamples == 1000000) EXIT
+        if (AcceptedSamples == 100000) EXIT
+        print *, AcceptedSamples, TotalSamples, DeltaEnergy
     enddo
 end subroutine
 

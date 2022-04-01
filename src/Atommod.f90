@@ -52,7 +52,7 @@ subroutine ParamaterInput (Variable)
     Variable%HWellDepth         = 65.6888                   !J/mol
     Variable%CSigma             = 1.9080                    !Unknown
     Variable%HSigma             = 0.6000                    !Unknown
-    Variable%r                  = 1e-9                      !Search radius
+    Variable%r                  = 1e-3                      !Search radius
     Variable%Boltzmann          = 1.3806485e-23             !m**2*kg/s**-2*K**-1
     Variable%Temp               = 550                       !K
 end subroutine
